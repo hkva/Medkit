@@ -69,7 +69,7 @@ static void _mk_set_last_error(const char* fmt, ...) {
 }
 
 #if defined(_MK_LINUX)
-    #define _MK_EINTERNAL()  _MK_SetLastError("Internal error (errno = %d)", errno)
+    #define _MK_EINTERNAL()  _mk_set_last_error("Internal error (errno = %d)", errno)
 #else
     #define _MK_EINTERNAL()  _mk_set_last_error("Internal error")
 #endif
@@ -468,13 +468,13 @@ bool mk_next_module(MK_ModuleList* list, MK_ModuleInfo* info) {
 
     // Skip entries with invalid names (except for the first entry, which is always the actual executable)
     if (info->path[0] != '/' || (list->map_count > 0 && strstr(info->path, ".so") == NULL)) {
-        return MK_NextModule(list, info);
+        return mk_next_module(list, info);
     }
     list->map_count += 1;
 
     // Ignore sequential duplicate entries
     if (strcmp(info->path, list->last_map_path) == 0) {
-        return MK_NextModule(list, info);
+        return mk_next_module(list, info);
     }
     strncpy(list->last_map_path, info->path, MK_MAX_PATH);
 
