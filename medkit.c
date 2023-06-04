@@ -551,7 +551,7 @@ typedef struct _MK_ElfSym {
     uint64_t st_value;
 } _MK_ElfSym;
 
-static bool _MK_ParseElfShdr(_MK_Reader* r, bool is_32, _MK_ElfShdr* hdr) {
+static bool _mk_parse_elf_shdr(_MK_Reader* r, bool is_32, _MK_ElfShdr* hdr) {
     if (is_32) {
         hdr->sh_name = _mk_read_u32(r);
         _mk_read_u32(r); // sh_type
@@ -578,7 +578,7 @@ static bool _MK_ParseElfShdr(_MK_Reader* r, bool is_32, _MK_ElfShdr* hdr) {
     return true;
 }
 
-static bool _MK_ParseElfSym(_MK_Reader* r, bool is_32, _MK_ElfSym* sym) {
+static bool _mk_parse_elf_sym(_MK_Reader* r, bool is_32, _MK_ElfSym* sym) {
     if (is_32) {
         sym->st_name = _mk_read_u32(r);
         sym->st_value = _mk_read_u32(r);
@@ -597,7 +597,7 @@ static bool _MK_ParseElfSym(_MK_Reader* r, bool is_32, _MK_ElfSym* sym) {
     return true;
 }
 
-static bool _MK_ParseElf(MK_Buffer buffer, MK_Exe* exe) {
+static bool _mk_parse_elf(MK_Buffer buffer, MK_Exe* exe) {
     _MK_Reader r = { buffer, 0 };
 
     exe->type = MK_EXE_TYPE_ELF;
@@ -632,7 +632,7 @@ static bool _MK_ParseElf(MK_Buffer buffer, MK_Exe* exe) {
     // Get section header string table
     _MK_ElfShdr shstrtabhdr;
     r.cur = e_shoff + e_shentsize * e_shstrndx;
-    if (!_MK_ParseElfShdr(&r, is_32, &shstrtabhdr)) {
+    if (!_mk_parse_elf_shdr(&r, is_32, &shstrtabhdr)) {
         _MK_EBADELF(); return false;
     }
     if (shstrtabhdr.sh_offset + shstrtabhdr.sh_size >= buffer.length) {
@@ -651,7 +651,7 @@ static bool _MK_ParseElf(MK_Buffer buffer, MK_Exe* exe) {
     for (size_t i = 0; i < exe->sections_count; ++i) {
         _MK_ElfShdr shdr;
         r.cur = e_shoff + e_shentsize * i;
-        if (!_MK_ParseElfShdr(&r, is_32, &shdr)) {
+        if (!_mk_parse_elf_shdr(&r, is_32, &shdr)) {
             _MK_EBADELF(); return false;
         }
         if (shdr.sh_name >= shstrtabhdr.sh_size) {
@@ -688,7 +688,7 @@ static bool _MK_ParseElf(MK_Buffer buffer, MK_Exe* exe) {
         for (size_t i = 0; i < exe->symbols_count; ++i) {
             _MK_ElfSym sym;
             r.cur = sh_symtab.sh_offset + sh_symtab.sh_entsize * i;
-            if (!_MK_ParseElfSym(&r, is_32, &sym)) {
+            if (!_mk_parse_elf_sym(&r, is_32, &sym)) {
                 _MK_EBADELF(); return false;
             }
             if (sym.st_name >= sh_strtab.sh_size) {
@@ -702,7 +702,7 @@ static bool _MK_ParseElf(MK_Buffer buffer, MK_Exe* exe) {
     return true;
 }
 
-static bool _MK_ParsePe(MK_Buffer buffer, MK_Exe* exe) {
+static bool _mk_parse_pe(MK_Buffer buffer, MK_Exe* exe) {
     _MK_Reader r = { buffer, 0 };
 
     exe->type = MK_EXE_TYPE_PE;
@@ -796,11 +796,11 @@ MK_Exe* mk_parse_exe(MK_Buffer buffer) {
     const uint8_t FILE_MAGIC_ELF[]  = { 0x7f, 'E', 'L', 'F' };
     const uint8_t FILE_MAGIC_PE[]   = { 'M', 'Z' };
     if (memcmp(buffer.data, FILE_MAGIC_ELF, _MK_MIN(sizeof(FILE_MAGIC_ELF), buffer.length)) == 0) {
-        if (!_MK_ParseElf(buffer, exe)) {
+        if (!_mk_parse_elf(buffer, exe)) {
             goto fail;
         }
     } else if (memcmp(buffer.data, FILE_MAGIC_PE, _MK_MIN(sizeof(FILE_MAGIC_PE), buffer.length)) == 0)  {
-        if (!_MK_ParsePe(buffer, exe)) {
+        if (!_mk_parse_pe(buffer, exe)) {
             goto fail;
         }
     } else {
