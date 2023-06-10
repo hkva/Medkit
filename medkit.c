@@ -231,7 +231,7 @@ bool mk_next_process(MK_ProcessList* list, MK_ProcessInfo* info) {
 #endif
 }
 
-void mk_end_process(MK_ProcessList* list) {
+void mk_end_process_list(MK_ProcessList* list) {
     if (!list) { _MK_EINVAL("list"); return; }
 #ifdef _MK_WINDOWS
     CloseHandle(list->snapshot);
@@ -256,7 +256,7 @@ bool mk_find_process(const char* name, MK_ProcessInfo* info) {
             break;
         }
     }
-    mk_end_process(list);
+    mk_end_process_list(list);
     return found;
 }
 

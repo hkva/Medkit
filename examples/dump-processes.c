@@ -24,7 +24,7 @@ int main(void) {
         mk_end_module_list(mlist);
     }
 
-    mk_end_process(plist);
+    mk_end_process_list(plist);
 
     // Look up some specific programs by name
     const char* EXAMPLE_PROGRAMS[] = {

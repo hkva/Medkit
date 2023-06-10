@@ -48,7 +48,7 @@ MK_API unsigned long mk_get_pid(void);
 // Walk the process list
 MK_API MK_ProcessList*  mk_begin_process_list(void);
 MK_API bool             mk_next_process(MK_ProcessList* list, MK_ProcessInfo* info);
-MK_API void             mk_end_process(MK_ProcessList* list);
+MK_API void             mk_end_process_list(MK_ProcessList* list);
 
 // Find a process by name
 // Matches absolute path and file name
